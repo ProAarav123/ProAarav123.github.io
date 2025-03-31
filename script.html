@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Reminder - Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            width: 80%;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #e9ecef;
+            padding: 10px;
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            border-radius: 5px;
+        }
+        .delete {
+            cursor: pointer;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginContainer" class="container">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Enter Username">
+        <input type="password" id="password" placeholder="Enter Password">
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div id="appContainer" class="container" style="display: none;">
+        <h2>Shopping Reminder</h2>
+        <button onclick="logout()" style="float:right;">Logout</button>
+        <input type="text" id="itemInput" placeholder="Enter an item...">
+        <button onclick="addItem()">Add Item</button>
+        <ul id="shoppingList"></ul>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", checkLogin);
+
+        function login() {
+            let user = document.getElementById("username").value.trim();
+            let pass = document.getElementById("password").value.trim();
+            if (user === "" || pass === "") return;
+            
+            localStorage.setItem("loggedInUser", user);
+            showApp();
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedInUser");
+            document.getElementById("appContainer").style.display = "none";
+            document.getElementById("loginContainer").style.display = "block";
+        }
+
+        function checkLogin() {
+            if (localStorage.getItem("loggedInUser")) {
+                showApp();
+            } else {
+                document.getElementById("loginContainer").style.display = "block";
+                document.getElementById("appContainer").style.display = "none";
+            }
+        }
+
+        function showApp() {
+            document.getElementById("loginContainer").style.display = "none";
+            document.getElementById("appContainer").style.display = "block";
+            loadItems();
+        }
+
+        function addItem() {
+            let input = document.getElementById("itemInput");
+            let item = input.value.trim();
+            if (item === "") return;
+            
+            let list = document.getElementById("shoppingList");
+            let li = document.createElement("li");
+            li.innerHTML = `${item} <span class='delete' onclick='removeItem(this)'>❌</span>`;
+            list.appendChild(li);
+            input.value = "";
+            saveItems();
+        }
+        
+        function removeItem(element) {
+            element.parentElement.remove();
+            saveItems();
+        }
+        
+        function saveItems() {
+            let items = [];
+            document.querySelectorAll("#shoppingList li").forEach(li => {
+                items.push(li.textContent.replace("❌", "").trim());
+            });
+            localStorage.setItem("shoppingItems", JSON.stringify(items));
+        }
+        
+        function loadItems() {
+            let items = JSON.parse(localStorage.getItem("shoppingItems")) || [];
+            let list = document.getElementById("shoppingList");
+            list.innerHTML = "";
+            items.forEach(item => {
+                let li = document.createElement("li");
+                li.innerHTML = `${item} <span class='delete' onclick='removeItem(this)'>❌</span>`;
+                list.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
